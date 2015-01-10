@@ -5,18 +5,78 @@
  */
 package ICWFC;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.JOptionPane;
+import static ICWFC.TestClass.input;
+import static ICWFC.TestClass.output;
+import static ICWFC.TestClass.writeData;
+
 /**
  *
  * @author THAMINA PRITY
  */
 public class Home extends javax.swing.JFrame {
+    Connection conn = null;
+    ResultSet rs = null;
+    PreparedStatement pst = null;
 
     /**
      * Creates new form Home
      */
     public Home() {
-        initComponents();
+        initComponents();        
+        conn = connectDb.ConnercrDB();
+        FillComboHome();
     }
+    
+    private void FillComboHome(){
+    try {
+        String sql = "SELECT\n" +
+                    "customer.customername,\n" +
+                    "car.carname,\n" +
+                    "driver.drivername\n" +
+                    "FROM\n" +
+                    "customer\n" +
+                    "INNER JOIN car ON customer.carid = car.carid\n" +
+                    "INNER JOIN driver ON customer.driverid = driver.driverid";
+        pst = conn.prepareStatement(sql);
+        rs = pst.executeQuery();
+        
+        while(rs.next()){
+            String customername = rs.getString("customername");
+            cmb_Customer.addItem(customername);
+            
+            String driverName = rs.getString("drivername");
+            cmb_Driver.addItem(driverName);
+            
+            String carName = rs.getString("carname");
+            cmb_Car.addItem(carName);           
+            
+            
+           // String driver = rs.getString("drivername");
+            //ComboBox_drivername.addItem(driver);
+            
+            
+        }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+        }
+    finally{
+            try {
+                //Close the database connection
+                rs.close();
+                pst.close();
+                
+            } catch (Exception e) {
+            }
+        }
+
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -30,20 +90,20 @@ public class Home extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         jToggleButton1 = new javax.swing.JToggleButton();
         panel_CurrentLitreValue = new javax.swing.JPanel();
-        jTextField1 = new javax.swing.JTextField();
+        txt_CurrentLitre = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        txt_SetLitre = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         panel_TotalCount = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
-        jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
+        lbl_Litre = new javax.swing.JLabel();
+        lbl_Price = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
+        lbl_Total = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         txt_CustomerName = new javax.swing.JTextField();
@@ -59,23 +119,25 @@ public class Home extends javax.swing.JFrame {
         txt_CarName = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         txt_CarNumber = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
+        btn_Reset = new javax.swing.JButton();
+        btn_New = new javax.swing.JButton();
+        btn_View = new javax.swing.JButton();
+        btn_Edit = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
-        jComboBox1 = new javax.swing.JComboBox();
+        cmb_Customer = new javax.swing.JComboBox();
         jLabel21 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox();
-        jComboBox3 = new javax.swing.JComboBox();
+        cmb_Driver = new javax.swing.JComboBox();
+        cmb_Car = new javax.swing.JComboBox();
         jLabel22 = new javax.swing.JLabel();
         panel_TotalToday = new javax.swing.JPanel();
         jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
+        lbl_TotalToday = new javax.swing.JLabel();
         panel_TotalLifeTime = new javax.swing.JPanel();
         jLabel16 = new javax.swing.JLabel();
-        jLabel17 = new javax.swing.JLabel();
+        lbl_TotalAllTime = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        lbl_Start = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem2 = new javax.swing.JMenuItem();
@@ -104,8 +166,18 @@ public class Home extends javax.swing.JFrame {
         jLabel2.setText("Set Litre");
 
         jButton1.setText("Clear");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Set");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout panel_CurrentLitreValueLayout = new javax.swing.GroupLayout(panel_CurrentLitreValue);
         panel_CurrentLitreValue.setLayout(panel_CurrentLitreValueLayout);
@@ -122,27 +194,29 @@ public class Home extends javax.swing.JFrame {
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton1))
-                    .addComponent(jTextField2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_SetLitre)
+                    .addComponent(txt_CurrentLitre, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(58, Short.MAX_VALUE))
         );
         panel_CurrentLitreValueLayout.setVerticalGroup(
             panel_CurrentLitreValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panel_CurrentLitreValueLayout.createSequentialGroup()
                 .addContainerGap(32, Short.MAX_VALUE)
-                .addGroup(panel_CurrentLitreValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                .addGroup(panel_CurrentLitreValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addComponent(txt_CurrentLitre, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(panel_CurrentLitreValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txt_SetLitre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panel_CurrentLitreValueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton3))
                 .addGap(26, 26, 26))
         );
+
+        panel_CurrentLitreValueLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {txt_CurrentLitre, txt_SetLitre});
 
         panel_TotalCount.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -152,58 +226,65 @@ public class Home extends javax.swing.JFrame {
         jLabel11.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel11.setText("Price:");
 
-        jLabel12.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel12.setText("0000");
+        lbl_Litre.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lbl_Litre.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbl_Litre.setText("0000");
 
-        jLabel13.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel13.setText("0000");
+        lbl_Price.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lbl_Price.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbl_Price.setText("0000");
 
         jLabel14.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel14.setText("Total:");
 
-        jLabel15.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel15.setText("0000");
+        lbl_Total.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lbl_Total.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lbl_Total.setText("0000");
 
         javax.swing.GroupLayout panel_TotalCountLayout = new javax.swing.GroupLayout(panel_TotalCount);
         panel_TotalCount.setLayout(panel_TotalCountLayout);
         panel_TotalCountLayout.setHorizontalGroup(
             panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel_TotalCountLayout.createSequentialGroup()
-                .addGap(41, 41, 41)
+                .addGap(64, 64, 64)
                 .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jSeparator1)
                     .addGroup(panel_TotalCountLayout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panel_TotalCountLayout.createSequentialGroup()
-                        .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(66, 66, 66)
-                        .addComponent(jLabel15))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panel_TotalCountLayout.createSequentialGroup()
-                        .addComponent(jLabel11)
-                        .addGap(95, 95, 95)
-                        .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(27, Short.MAX_VALUE))
+                        .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel11))
+                        .addGap(34, 34, 34)
+                        .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(lbl_Price, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lbl_Litre, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lbl_Total, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(69, Short.MAX_VALUE))
         );
+
+        panel_TotalCountLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {lbl_Litre, lbl_Price, lbl_Total});
+
         panel_TotalCountLayout.setVerticalGroup(
             panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panel_TotalCountLayout.createSequentialGroup()
-                .addGap(24, 24, 24)
-                .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(jLabel12))
+                .addGap(23, 23, 23)
+                .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panel_TotalCountLayout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel11))
+                    .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(lbl_Price)
+                        .addGroup(panel_TotalCountLayout.createSequentialGroup()
+                            .addComponent(lbl_Litre)
+                            .addGap(28, 28, 28))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel11)
-                    .addComponent(jLabel13))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel15)
-                    .addComponent(jLabel14))
-                .addContainerGap(35, Short.MAX_VALUE))
+                .addGap(5, 5, 5)
+                .addGroup(panel_TotalCountLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel14)
+                    .addComponent(lbl_Total))
+                .addContainerGap(36, Short.MAX_VALUE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Customer Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 14))); // NOI18N
@@ -229,13 +310,23 @@ public class Home extends javax.swing.JFrame {
         jLabel10.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel10.setText("Car Number:");
 
-        jButton2.setText("Reset");
+        btn_Reset.setText("Reset");
+        btn_Reset.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_ResetActionPerformed(evt);
+            }
+        });
 
-        jButton4.setText("Add");
+        btn_New.setText("New");
+        btn_New.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_NewActionPerformed(evt);
+            }
+        });
 
-        jButton5.setText("View");
+        btn_View.setText("View");
 
-        jButton6.setText("Edit");
+        btn_Edit.setText("Edit");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -245,13 +336,13 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jButton4)
+                        .addComponent(btn_New)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton5)
+                        .addComponent(btn_View)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton6)
+                        .addComponent(btn_Edit)
                         .addGap(153, 153, 153)
-                        .addComponent(jButton2))
+                        .addComponent(btn_Reset))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -312,10 +403,10 @@ public class Home extends javax.swing.JFrame {
                     .addComponent(jLabel10))
                 .addGap(38, 38, 38)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton2)
-                    .addComponent(jButton4)
-                    .addComponent(jButton5)
-                    .addComponent(jButton6))
+                    .addComponent(btn_Reset)
+                    .addComponent(btn_New)
+                    .addComponent(btn_View)
+                    .addComponent(btn_Edit))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -323,8 +414,17 @@ public class Home extends javax.swing.JFrame {
 
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Select Customer", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 14))); // NOI18N
 
-        jComboBox1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select" }));
+        cmb_Customer.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        cmb_Customer.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select" }));
+        cmb_Customer.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) {
+            }
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {
+                cmb_CustomerPopupMenuWillBecomeInvisible(evt);
+            }
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {
+            }
+        });
 
         jLabel21.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel21.setText("Driver :");
@@ -332,11 +432,11 @@ public class Home extends javax.swing.JFrame {
         jLabel20.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel20.setText("Customer: ");
 
-        jComboBox2.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select" }));
+        cmb_Driver.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        cmb_Driver.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select" }));
 
-        jComboBox3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select" }));
+        cmb_Car.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        cmb_Car.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Select" }));
 
         jLabel22.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel22.setText("Car :");
@@ -354,9 +454,9 @@ public class Home extends javax.swing.JFrame {
                         .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jComboBox1, 0, 360, Short.MAX_VALUE)
-                    .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jComboBox3, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(cmb_Customer, 0, 360, Short.MAX_VALUE)
+                    .addComponent(cmb_Driver, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cmb_Car, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
@@ -365,14 +465,14 @@ public class Home extends javax.swing.JFrame {
                 .addGap(19, 19, 19)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmb_Customer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel21)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cmb_Driver, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(9, 9, 9)
                 .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmb_Car, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel22))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -382,8 +482,8 @@ public class Home extends javax.swing.JFrame {
         jLabel18.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel18.setText("Total Today");
 
-        jLabel19.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel19.setText("00000");
+        lbl_TotalToday.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lbl_TotalToday.setText("00000");
 
         javax.swing.GroupLayout panel_TotalTodayLayout = new javax.swing.GroupLayout(panel_TotalToday);
         panel_TotalToday.setLayout(panel_TotalTodayLayout);
@@ -393,7 +493,7 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel18)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel19)
+                .addComponent(lbl_TotalToday)
                 .addContainerGap())
         );
         panel_TotalTodayLayout.setVerticalGroup(
@@ -402,7 +502,7 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(panel_TotalTodayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel18)
-                    .addComponent(jLabel19))
+                    .addComponent(lbl_TotalToday))
                 .addContainerGap())
         );
 
@@ -411,8 +511,8 @@ public class Home extends javax.swing.JFrame {
         jLabel16.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel16.setText("Total Lifetime: ");
 
-        jLabel17.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabel17.setText("00000000");
+        lbl_TotalAllTime.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lbl_TotalAllTime.setText("00000000");
 
         javax.swing.GroupLayout panel_TotalLifeTimeLayout = new javax.swing.GroupLayout(panel_TotalLifeTime);
         panel_TotalLifeTime.setLayout(panel_TotalLifeTimeLayout);
@@ -422,7 +522,7 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel16)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel17)
+                .addComponent(lbl_TotalAllTime)
                 .addContainerGap())
         );
         panel_TotalLifeTimeLayout.setVerticalGroup(
@@ -431,13 +531,24 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(panel_TotalLifeTimeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel16)
-                    .addComponent(jLabel17))
+                    .addComponent(lbl_TotalAllTime))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        jButton2.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jButton2.setText("Connect");
+
+        lbl_Start.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lbl_Start.setText("Stop");
 
         jMenu2.setText("Setting");
 
         jMenuItem2.setText("Option");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
         jMenu2.add(jMenuItem2);
 
         jMenuItem3.setText("Calibration");
@@ -475,19 +586,26 @@ public class Home extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(23, 23, 23)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(panel_TotalCount, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panel_TotalToday, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(panel_TotalLifeTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addComponent(panel_CurrentLitreValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(23, 23, 23)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(21, 21, 21)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(panel_TotalToday, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(panel_TotalLifeTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(panel_TotalCount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(27, 27, 27)
+                        .addComponent(panel_CurrentLitreValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(lbl_Start)
+                                .addGap(287, 287, 287)
+                                .addComponent(jButton2)
+                                .addGap(9, 9, 9)))))
                 .addGap(26, 26, 26))
         );
         layout.setVerticalGroup(
@@ -496,22 +614,152 @@ public class Home extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panel_CurrentLitreValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(35, 35, 35)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton2)
+                            .addComponent(lbl_Start))))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(9, 9, 9)
+                        .addGap(24, 24, 24)
                         .addComponent(panel_TotalCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(panel_TotalToday, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(panel_TotalLifeTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(23, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(29, 29, 29)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void cmb_CustomerPopupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {//GEN-FIRST:event_cmb_CustomerPopupMenuWillBecomeInvisible
+        try {            
+            String tmpCustomer = (String)cmb_Customer.getSelectedItem();
+            //String tmpDriver = (String) cmb_Driver.getSelectedItem();
+            //String tmpCar = (String) cmb_Car.getSelectedItem();
+            
+            String sql = "SELECT\n" +
+                        "customer.customername,\n" +
+                        "customer.customerphone,\n" +
+                        "customer.customeraddress,\n" +
+                        "driver.drivername,\n" +
+                        "driver.driverphone,\n" +
+                        "car.carname,\n" +
+                        "car.carnumber\n" +
+                        "FROM\n" +
+                        "customer\n" +
+                        "INNER JOIN driver ON customer.driverid = driver.driverid\n" +
+                        "INNER JOIN car ON customer.carid = car.carid\n" +
+                        "WHERE\n" +
+                        "customer.customername = ?";
+                    
+            pst = conn.prepareStatement(sql);
+            pst.setString(1, tmpCustomer);
+            //pst.setString(2, tmpDriver);
+            //pst.setString(3, tmpCar);
+            rs = pst.executeQuery();
+            
+            if(rs.next()){
+                
+            //All Customer Info
+            String cmbHomeCustomerName = rs.getString("customername");
+            txt_CustomerName.setText(cmbHomeCustomerName);
+            String cmbHomeCustomerPhone = rs.getString("customerphone");
+            txt_CustomerPhone.setText(cmbHomeCustomerPhone);
+            String cmbHomeCustomerAddress = rs.getString("customeraddress");
+            txt_CustomerAddress.setText(cmbHomeCustomerAddress);
+            
+            //All Driver Info\
+            String cmbHomeDriverName = rs.getString("drivername");
+            txt_DriverName.setText(cmbHomeDriverName);
+            String cmbHomeDriverPhone = rs.getString("driverphone");
+            txt_DriverPhone.setText(cmbHomeDriverPhone);
+            
+            //All Car Info
+            String cmbHomeCarName = rs.getString("carname");
+            txt_CarName.setText(cmbHomeCarName);
+            String cmbHomeCarNumber = rs.getString("carnumber");
+            txt_CarNumber.setText(cmbHomeCarNumber);
+            }
+            
+        } catch (Exception e) {
+             JOptionPane.showMessageDialog(null, e);
+        }
+    }//GEN-LAST:event_cmb_CustomerPopupMenuWillBecomeInvisible
+
+    private void btn_NewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_NewActionPerformed
+        NewCustomer nc = new NewCustomer();
+        nc.setVisible(true);
+    }//GEN-LAST:event_btn_NewActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        String myInt1 = txt_CurrentLitre.getText(); 
+        txt_SetLitre.setText(myInt1);
+        
+        int currentLitre = Integer.parseInt(myInt1);
+        
+        int LitrePrice = 20;
+        //String currentLitre = myInt1.toString();
+        
+        int total = LitrePrice * currentLitre;
+        
+        
+        
+        lbl_Litre.setText(myInt1);
+        lbl_Price.setText("20");
+        
+        lbl_Total.setText(String.valueOf(total));
+        
+        //label.setText(String.valueOf(intValue));
+        //label.setText(Integer.toString(intValue));
+    
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        txt_CurrentLitre.setText("");
+        txt_SetLitre.setText("");
+        lbl_Litre.setText("0000");
+        lbl_Price.setText("0000");
+        lbl_Total.setText("0000");
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        OptionPanel op = new OptionPanel();
+        op.setVisible(true);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void btn_ResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ResetActionPerformed
+         
+        try {
+            SerialClass obj = new SerialClass();
+            int c = 0;
+            obj.initialize();
+            input = SerialClass.input;
+            output = SerialClass.output;
+            InputStreamReader Ir = new InputStreamReader(System.in);
+            BufferedReader Br = new BufferedReader(Ir);
+            
+            writeData("DLBD+TL=?");
+            String inputLine = input.readLine();
+            System.out.println(inputLine);
+            
+            //jTextField1.setText(inputLine);
+            
+            //String to Character convert
+            String str=inputLine;
+            lbl_Start.setText(str);
+  
+            obj.close();
+            
+        } catch (IOException ex) {           
+            
+        }
+    }//GEN-LAST:event_btn_ResetActionPerformed
 
     /**
      * @param args the command line arguments
@@ -549,26 +797,22 @@ public class Home extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btn_Edit;
+    private javax.swing.JButton btn_New;
+    private javax.swing.JButton btn_Reset;
+    private javax.swing.JButton btn_View;
+    private javax.swing.JComboBox cmb_Car;
+    private javax.swing.JComboBox cmb_Customer;
+    private javax.swing.JComboBox cmb_Driver;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JComboBox jComboBox1;
-    private javax.swing.JComboBox jComboBox2;
-    private javax.swing.JComboBox jComboBox3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
@@ -595,19 +839,25 @@ public class Home extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JToggleButton jToggleButton1;
+    private javax.swing.JLabel lbl_Litre;
+    private javax.swing.JLabel lbl_Price;
+    private javax.swing.JLabel lbl_Start;
+    private javax.swing.JLabel lbl_Total;
+    private javax.swing.JLabel lbl_TotalAllTime;
+    private javax.swing.JLabel lbl_TotalToday;
     private javax.swing.JPanel panel_CurrentLitreValue;
     private javax.swing.JPanel panel_TotalCount;
     private javax.swing.JPanel panel_TotalLifeTime;
     private javax.swing.JPanel panel_TotalToday;
     private javax.swing.JTextField txt_CarName;
     private javax.swing.JTextField txt_CarNumber;
+    private javax.swing.JTextField txt_CurrentLitre;
     private javax.swing.JTextField txt_CustomerAddress;
     private javax.swing.JTextField txt_CustomerName;
     private javax.swing.JTextField txt_CustomerPhone;
     private javax.swing.JTextField txt_DriverName;
     private javax.swing.JTextField txt_DriverPhone;
+    private javax.swing.JTextField txt_SetLitre;
     // End of variables declaration//GEN-END:variables
 }
