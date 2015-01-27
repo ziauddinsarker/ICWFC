@@ -61,6 +61,12 @@ public class Login extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Login", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Calibri", 1, 18), new java.awt.Color(0, 51, 255))); // NOI18N
 
+        txt_password.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txt_passwordKeyPressed(evt);
+            }
+        });
+
         label_Username.setText("Username");
 
         label_Password.setText("Password");
@@ -133,11 +139,12 @@ public class Login extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmd_loginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmd_loginActionPerformed
         // TODO add your handling code here:
-        String sql = "SELECT * FROM employee WHERE username=? and password=?";
+        String sql = "SELECT * FROM users WHERE username=? and userpassword=?";
         try {
             pst = conn.prepareStatement(sql);
             pst.setString(1,txt_username.getText());
@@ -145,7 +152,7 @@ public class Login extends javax.swing.JFrame {
             
             rs = pst.executeQuery();
             if (rs.next()){
-                JOptionPane.showMessageDialog(null, "Username and Password is Correct");
+                //JOptionPane.showMessageDialog(null, "Username and Password is Correct");
                 //Close the database connection
                 rs.close();
                 pst.close();
@@ -169,6 +176,44 @@ public class Login extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_cmd_loginActionPerformed
+
+    private void txt_passwordKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txt_passwordKeyPressed
+        if(evt.getKeyCode()==KeyEvent.VK_ENTER){
+                // TODO add your handling code here:
+        String sql = "SELECT * FROM users WHERE username=? and userpassword=?";
+        try {
+            pst = conn.prepareStatement(sql);
+            pst.setString(1,txt_username.getText());
+            pst.setString(2,txt_password.getText());
+            
+            rs = pst.executeQuery();
+            if (rs.next()){
+                
+                //Close the database connection
+                rs.close();
+                pst.close();
+                close();
+                Home s = new Home();
+                s.setVisible(true);
+            }else{
+                JOptionPane.showMessageDialog(null, "Username and Password is Not Correct");
+            }
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e);
+            
+        }finally{
+            try {
+                //Close the database connection
+                rs.close();
+                pst.close();
+                
+            } catch (Exception e) {
+            }
+        }
+        
+        }
+    }//GEN-LAST:event_txt_passwordKeyPressed
 
     /**
      * @param args the command line arguments

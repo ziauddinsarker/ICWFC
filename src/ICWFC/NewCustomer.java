@@ -5,9 +5,13 @@
  */
 package ICWFC;
 
+import java.awt.Cursor;
+import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.swing.JOptionPane;
 
     
@@ -24,6 +28,7 @@ public class NewCustomer extends javax.swing.JFrame {
      */
     public NewCustomer() {
         initComponents();
+        conn = connectDb.ConnercrDB();
     }
 
     /**
@@ -53,7 +58,7 @@ public class NewCustomer extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         txt_CustomerPhone = new javax.swing.JTextField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         btn_Save.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btn_Save.setText("Save");
@@ -65,17 +70,17 @@ public class NewCustomer extends javax.swing.JFrame {
 
         btn_Close.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         btn_Close.setText("Close");
+        btn_Close.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_CloseActionPerformed(evt);
+            }
+        });
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Customer Information", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 14))); // NOI18N
 
         txt_DriverName.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         txt_CustomerAddress.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        txt_CustomerAddress.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_CustomerAddressActionPerformed(evt);
-            }
-        });
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jLabel3.setText("Driver Name:");
@@ -97,11 +102,6 @@ public class NewCustomer extends javax.swing.JFrame {
         jLabel5.setText("Car Name:");
 
         txt_CarName.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        txt_CarName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_CarNameActionPerformed(evt);
-            }
-        });
 
         txt_CarNumber.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
@@ -112,11 +112,6 @@ public class NewCustomer extends javax.swing.JFrame {
         jLabel7.setText("Customer Phone");
 
         txt_CustomerPhone.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        txt_CustomerPhone.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_CustomerPhoneActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -209,33 +204,69 @@ public class NewCustomer extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void txt_CustomerAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_CustomerAddressActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txt_CustomerAddressActionPerformed
-
-    private void txt_CarNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_CarNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txt_CarNameActionPerformed
-
-    private void txt_CustomerPhoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_CustomerPhoneActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txt_CustomerPhoneActionPerformed
-
+ //Close previous jFrame 
+    public void close(){
+        WindowEvent winClosingEvent = new WindowEvent(this,WindowEvent.WINDOW_CLOSING);
+        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(winClosingEvent);
+               
+    }
+    
     private void btn_SaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_SaveActionPerformed
+  
+        
         try {
-            String sql = "INSERT into customer (customername, customeraddress, customerphone) values (?, ?, ?)";
-            pst = conn.prepareStatement(sql);   
+            String sql1 = "INSERT INTO driver (drivername, driverphone)\n" +
+                        "VALUES\n" +
+                        "(?, ?)";
+            pst = conn.prepareStatement(sql1);
+                    
+            pst.setString(1, txt_DriverName.getText());
+            pst.setString(2, txt_DriverPhone.getText());
+            pst.execute();
             
+            
+             String sql2 = "INSERT INTO car (carname, carnumber)\n" +
+                        "VALUES\n" +
+                        "(?, ?)";
+            pst = conn.prepareStatement(sql2);
+                    
+            pst.setString(1, txt_CarName.getText());
+            pst.setString(2, txt_CarNumber.getText());
+            pst.execute();
+            
+         // String sq2= "last_insert_rowid()";  
+         // pst = conn.prepareStatement(sql2);          
+                 
+          //System.out.println(pst);
+         // pst.execute();
+            
+        String sql = "INSERT \n" +
+          "INTO customer (\n" +
+          "customername,\n" +
+          "customeraddress,\n" +
+          "customerphone,\n" + 
+          "driverid,\n"+
+           "carid\n"+
+          ")\n" +
+          "VALUES\n" +
+          "(?, ?, ?,(SELECT MAX(driverid)FROM driver),(SELECT MAX(carid)FROM car))";
+            
+            pst = conn.prepareStatement(sql);               
             pst.setString(1, txt_CustomerName.getText());
             pst.setString(2, txt_CustomerAddress.getText());
-            pst.setString(3, txt_CustomerPhone.getText());
+            pst.setString(3, txt_CustomerPhone.getText());            
             pst.execute();
+            
+            
            JOptionPane.showMessageDialog(null, "Your Data successfully Saved");
         } catch (Exception e) {
              JOptionPane.showMessageDialog(null, e);
         }
     }//GEN-LAST:event_btn_SaveActionPerformed
+
+    private void btn_CloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_CloseActionPerformed
+        close();
+    }//GEN-LAST:event_btn_CloseActionPerformed
 
     /**
      * @param args the command line arguments

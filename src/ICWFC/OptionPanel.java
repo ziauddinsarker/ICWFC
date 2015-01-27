@@ -5,6 +5,14 @@
  */
 package ICWFC;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+
 /**
  *
  * @author THAMINA PRITY
@@ -17,7 +25,58 @@ public class OptionPanel extends javax.swing.JFrame {
     public OptionPanel() {
         initComponents();
     }
+    /////////////////////////////////////////
+      //passed from main GUI
+   // GUI window = null;
 
+    //for containing the ports that will be found
+    private Enumeration ports = null;
+    //map the port names to CommPortIdentifiers
+    private HashMap portMap = new HashMap();
+
+    //this is the object that contains the opened port
+    private CommPortIdentifier selectedPortIdentifier = null;
+    private SerialPort serialPort = null;
+
+    //input and output streams for sending and receiving data
+    private InputStream input = null;
+    //private OutputStream output = null;
+
+    //just a boolean flag that i use for enabling
+    //and disabling buttons depending on whether the program
+    //is connected to a serial port or not
+    private boolean bConnected = false;
+
+    //the timeout value for connecting with the port
+    final static int TIMEOUT = 2000;
+
+    //some ascii values for for certain things
+    final static int SPACE_ASCII = 32;
+    final static int DASH_ASCII = 45;
+    final static int NEW_LINE_ASCII = 10;
+
+    //a string for recording what goes on in the program
+    //this string is written to the GUI
+    String logText = "";
+    /////////////////////////////////////////
+  /*
+    public void searchForPorts()
+    {
+        ports = CommPortIdentifier.getPortIdentifiers();
+
+        while (ports.hasMoreElements())
+        {
+            CommPortIdentifier curPort = (CommPortIdentifier)ports.nextElement();
+
+            //get only serial ports
+            if (curPort.getPortType() == CommPortIdentifier.PORT_SERIAL)
+            {
+                window.cboxPorts.addItem(curPort.getName());
+                portMap.put(curPort.getName(), curPort);
+            }
+        }
+    }
+    */
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -27,8 +86,8 @@ public class OptionPanel extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btn_Close = new javax.swing.JButton();
+        btn_Update = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jTextField3 = new javax.swing.JTextField();
         jTextField4 = new javax.swing.JTextField();
@@ -44,9 +103,14 @@ public class OptionPanel extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
-        jButton3.setText("Close");
+        btn_Close.setText("Close");
+        btn_Close.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_CloseActionPerformed(evt);
+            }
+        });
 
-        jButton4.setText("Save");
+        btn_Update.setText("Update");
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Inturrept", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 14))); // NOI18N
 
@@ -159,9 +223,9 @@ public class OptionPanel extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jToggleButton1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton4)
+                        .addComponent(btn_Update)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton3)))
+                        .addComponent(btn_Close)))
                 .addContainerGap(40, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -175,8 +239,8 @@ public class OptionPanel extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(jToggleButton1)
-                    .addComponent(jButton3)
-                    .addComponent(jButton4))
+                    .addComponent(btn_Close)
+                    .addComponent(btn_Update))
                 .addContainerGap(35, Short.MAX_VALUE))
         );
 
@@ -186,6 +250,13 @@ public class OptionPanel extends javax.swing.JFrame {
     private void jToggleButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jToggleButton1ActionPerformed
+    public void close(){
+        WindowEvent winClosingEvent = new WindowEvent(this,WindowEvent.WINDOW_CLOSING);
+        Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(winClosingEvent);
+    }
+    private void btn_CloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_CloseActionPerformed
+        close();
+    }//GEN-LAST:event_btn_CloseActionPerformed
 
     /**
      * @param args the command line arguments
@@ -223,8 +294,8 @@ public class OptionPanel extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton btn_Close;
+    private javax.swing.JButton btn_Update;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JComboBox jComboBox2;
     private javax.swing.JLabel jLabel3;
